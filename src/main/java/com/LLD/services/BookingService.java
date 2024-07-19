@@ -10,7 +10,8 @@ import com.LLD.repos.HotelRepositery;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Objects;
+import java.util.Optional;
 
 
 public class BookingService {
@@ -30,22 +31,15 @@ public class BookingService {
 
 
         List<Hotel> hotellist=hotelRepositery.getHotels();
-        List<Hotel> cheapestHotel= new ArrayList<>();
-        final Integer[] myPrice = {Integer.MAX_VALUE};
-        hotellist.forEach(hotel -> {
-            Integer rateCustomerDaytime = hotel.getRate(customerType, dayTime);
-            if(rateCustomerDaytime < myPrice[0]){
-                myPrice[0] = rateCustomerDaytime;
-                cheapestHotel.clear();
-                cheapestHotel.add(hotel);
+          Optional<Hotel> cheapestHotel;
+        cheapestHotel = hotellist.stream().min((h1, h2) -> {
+            if (Objects.equals(h1.getRate(customerType, dayTime), h2.getRate(customerType, dayTime))) {
+                return h1.getRating() - h2.getRating();
             }
-            else{
-                if(rateCustomerDaytime == myPrice[0]){
-                    cheapestHotel.add(hotel);
-                }
-            }
+            return h1.getRate(customerType, dayTime) - h2.getRate(customerType, dayTime);
         });
-        return cheapestHotel.size() == 1 ? cheapestHotel.get(0) : cheapestHotel.stream().min((h1, h2) -> h1.getRating() - h2.getRating()).get();
+        return cheapestHotel.orElseThrow();
+
 
     }
 }
