@@ -13,7 +13,7 @@ public class BookingController {
         this.bookingService = bookingService;
     }
 
-    public Hotel getCheapestPrice(CustomerType custsomerType, DayType dayTime) {
+    public Hotel getCheapestPrice(CustomerType custsomerType, DayType dayTime) throws Exception {
          return bookingService.getCheapestHotel( custsomerType, dayTime);
 
     }

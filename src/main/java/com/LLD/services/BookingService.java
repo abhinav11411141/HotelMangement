@@ -1,6 +1,8 @@
 package com.LLD.services;
 
 
+import com.LLD.Exceptions.DayTimeInvalid;
+import com.LLD.Exceptions.customerNotFound;
 import com.LLD.models.CustomerType;
 import com.LLD.models.DayType;
 import com.LLD.models.Hotel;
@@ -9,6 +11,8 @@ import com.LLD.repos.HotelRepositery;
 import java.util.ArrayList;
 import java.util.List;
 
+
+
 public class BookingService {
     HotelRepositery hotelRepositery;
 
@@ -16,32 +20,32 @@ public class BookingService {
         this.hotelRepositery = hotelRepositery;
     }
 
-    public Hotel getCheapestHotel(CustomerType custsomerType, DayType dayTime){
+    public Hotel getCheapestHotel(CustomerType customerType, DayType dayTime) throws DayTimeInvalid , customerNotFound {
+
+         if(customerType == null){
+            throw new customerNotFound("Customer Type is not found");}
+         if(dayTime == null){
+            throw new DayTimeInvalid("Day Time is not found");}
+
+
+
         List<Hotel> hotellist=hotelRepositery.getHotels();
-        List<Hotel> cheapesthotel= new ArrayList<>();
-        double myprice=Double.MAX_VALUE;
-        for(Hotel hotel:hotellist){
-            Integer rateforcustomerdaytime = hotel.getRates().get(custsomerType).get(dayTime);
-            if(rateforcustomerdaytime<myprice){
-                myprice=rateforcustomerdaytime;
-                cheapesthotel.clear();
-                cheapesthotel.add(hotel);
+        List<Hotel> cheapestHotel= new ArrayList<>();
+        final Integer[] myPrice = {Integer.MAX_VALUE};
+        hotellist.forEach(hotel -> {
+            Integer rateCustomerDaytime = hotel.getRate(customerType, dayTime);
+            if(rateCustomerDaytime < myPrice[0]){
+                myPrice[0] = rateCustomerDaytime;
+                cheapestHotel.clear();
+                cheapestHotel.add(hotel);
             }
             else{
-                if(rateforcustomerdaytime==myprice){
-                    cheapesthotel.add(hotel);
+                if(rateCustomerDaytime == myPrice[0]){
+                    cheapestHotel.add(hotel);
                 }
             }
-        }
-        if(cheapesthotel.size()==1)return cheapesthotel.get(0);
-        else{
-            Hotel besthotel=cheapesthotel.get(0);
-            for(Hotel hotel:cheapesthotel){
-                if(hotel.getRating()>besthotel.getRating()){
-                    besthotel=hotel;
-                }
-            }
-            return besthotel;
-        }
+        });
+        return cheapestHotel.size() == 1 ? cheapestHotel.get(0) : cheapestHotel.stream().min((h1, h2) -> h1.getRating() - h2.getRating()).get();
+
     }
 }

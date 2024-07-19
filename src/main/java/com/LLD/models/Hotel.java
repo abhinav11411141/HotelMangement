@@ -36,4 +36,7 @@ public class Hotel {
     public void setRating(int rating) {
         this.rating = rating;
     }
+    public Integer getRate(CustomerType customerType, DayType dayType){
+        return rates.get(customerType).get(dayType);
+    }
 }
